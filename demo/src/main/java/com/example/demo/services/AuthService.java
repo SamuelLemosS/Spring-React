@@ -6,6 +6,7 @@ import com.example.demo.dto.UserRegistrationDto;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,7 +29,7 @@ public class AuthService implements UserDetailsService {
     
     @Autowired
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder, 
-                      JwtService jwtService, AuthenticationManager authenticationManager, 
+                      JwtService jwtService,@Lazy AuthenticationManager authenticationManager,
                       EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
