@@ -51,9 +51,9 @@ public class AuthService implements UserDetailsService {
         
         userRepository.save(user);
 
-        if(user.getRole().equals("admin")){
+        if(user.getRole().equals("ADMIN")){
             return "Adiministrador registrado com sucesso!";
-        }else if (user.getRole().equals("user")) {
+        }else if (user.getRole().equals("USER")) {
             return "Usuario registrado com sucesso!";
         }
 

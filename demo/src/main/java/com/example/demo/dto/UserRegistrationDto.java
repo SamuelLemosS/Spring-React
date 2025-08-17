@@ -19,7 +19,7 @@ public class UserRegistrationDto {
     @Size(min = 6, message = "Senha deve ter pelo menos 6 caracteres")
     private String password;
 
-    private String role = "user";
+    private String role = "USER";
     
     // Construtores
     public UserRegistrationDto() {}
@@ -28,7 +28,7 @@ public class UserRegistrationDto {
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = "user";
+        this.role = "USER";
     }
     
     // Getters e Setters
