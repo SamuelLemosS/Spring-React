@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.dto.ForgotPasswordDto;
 import com.example.demo.dto.LoginDto;
+import com.example.demo.dto.LoginResponseDto;
 import com.example.demo.dto.UserRegistrationDto;
 import com.example.demo.models.User;
 import com.example.demo.repositories.UserRepository;
@@ -56,7 +57,7 @@ public class AuthService implements UserDetailsService {
         return "Usuário registrado com sucesso!";
     }
     
-    public String login(LoginDto loginDto) {
+    public LoginResponseDto  login(LoginDto loginDto) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword())
@@ -64,8 +65,8 @@ public class AuthService implements UserDetailsService {
             
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtService.generateToken(userDetails);
-            
-            return "Login realizado com sucesso! Token: " + token;
+            User user =  userRepository.findByEmail(loginDto.getEmail()).get();
+            return new LoginResponseDto(token, user.getId());
             
         } catch (Exception e) {
             throw new RuntimeException("Credenciais inválidas");

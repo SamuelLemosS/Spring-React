@@ -17,6 +17,8 @@ public class UserRegistrationDto {
     @NotBlank(message = "Senha é obrigatória")
     @Size(min = 6, message = "Senha deve ter pelo menos 6 caracteres")
     private String password;
+
+    private String role = "user";
     
     // Construtores
     public UserRegistrationDto() {}
@@ -25,6 +27,7 @@ public class UserRegistrationDto {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = "user";
     }
     
     // Getters e Setters
@@ -36,4 +39,7 @@ public class UserRegistrationDto {
     
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }
