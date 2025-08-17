@@ -45,19 +45,11 @@ public class EmailController {
         }
     }
     
-    @GetMapping("/stats")
-    public ResponseEntity<String> getEmailStats() {
-        long total = emailHistoryRepository.count();
-        long sent = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.SENT).size();
-        long failed = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.FAILED).size();
-        long pending = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.PENDING).size();
+    @GetMapping("/stats/{id}")
+    public ResponseEntity<String> getEmailStats(@PathVariable Long id) {
+
+        String result = emailService.sendStatsEmail(id);
         
-        String stats = String.format("Estatísticas de Email:\n" +
-                "Total: %d\n" +
-                "Enviados: %d\n" +
-                "Falharam: %d\n" +
-                "Pendentes: %d", total, sent, failed, pending);
-        
-        return ResponseEntity.ok(stats);
+        return ResponseEntity.ok(result);
     }
 }

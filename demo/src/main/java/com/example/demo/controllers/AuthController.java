@@ -1,6 +1,5 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dto.ForgotPasswordDto;
 import com.example.demo.dto.LoginDto;
 import com.example.demo.dto.LoginResponseDto;
 import com.example.demo.dto.UserRegistrationDto;
@@ -41,14 +40,5 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Erro no login: " + e.getMessage());
         }
     }
-    
-    @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordDto forgotPasswordDto) {
-        try {
-            String result = authService.forgotPassword(forgotPasswordDto);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro na recuperação: " + e.getMessage());
-        }
-    }
+
 }

@@ -1,6 +1,5 @@
 package com.example.demo.services;
 
-import com.example.demo.dto.ForgotPasswordDto;
 import com.example.demo.dto.LoginDto;
 import com.example.demo.dto.LoginResponseDto;
 import com.example.demo.dto.UserRegistrationDto;
@@ -48,13 +47,17 @@ public class AuthService implements UserDetailsService {
         user.setName(registrationDto.getName());
         user.setEmail(registrationDto.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
+        user.setRole(registrationDto.getRole());
         
         userRepository.save(user);
-        
-        // Enviar email de boas-vindas
-        emailService.sendWelcomeEmail(user);
-        
-        return "Usuário registrado com sucesso!";
+
+        if(user.getRole().equals("admin")){
+            return "Adiministrador registrado com sucesso!";
+        }else if (user.getRole().equals("user")) {
+            return "Usuario registrado com sucesso!";
+        }
+
+        return "Conta registrado com sucesso!";
     }
     
     public LoginResponseDto  login(LoginDto loginDto) {
@@ -71,15 +74,6 @@ public class AuthService implements UserDetailsService {
         } catch (Exception e) {
             throw new RuntimeException("Credenciais inválidas");
         }
-    }
-    
-    public String forgotPassword(ForgotPasswordDto forgotPasswordDto) {
-        User user = userRepository.findByEmail(forgotPasswordDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        
-        emailService.sendForgotPasswordEmail(user);
-        
-        return "Email de recuperação enviado para " + user.getEmail();
     }
     
     @Override

@@ -3,6 +3,7 @@ package com.example.demo.services;
 import com.example.demo.models.EmailHistory;
 import com.example.demo.models.User;
 import com.example.demo.repositories.EmailHistoryRepository;
+import com.example.demo.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -17,11 +18,13 @@ public class EmailService {
     
     private final JavaMailSender mailSender;
     private final EmailHistoryRepository emailHistoryRepository;
-    
+    private final UserRepository userRepository;
+
     @Autowired
-    public EmailService(JavaMailSender mailSender, EmailHistoryRepository emailHistoryRepository) {
+    public EmailService(JavaMailSender mailSender, EmailHistoryRepository emailHistoryRepository, UserRepository userRepository) {
         this.mailSender = mailSender;
         this.emailHistoryRepository = emailHistoryRepository;
+        this.userRepository = userRepository;
     }
     
     @Async
@@ -84,47 +87,35 @@ public class EmailService {
         message.setText(body);
         mailSender.send(message);
     }
-    
-    public String sendForgotPasswordEmail(User user) {
-        String subject = "Recuperação de Senha";
-        String body = createForgotPasswordTemplate(user.getName());
-        
+
+    public String sendStatsEmail(Long userId) {
+        String subject = "Estatisticas de email";
+
+        User user = userRepository.findById(userId).get();
+        String body = createStatsTemplate(user.getName());
+
         try {
             sendEmailWithRetry(user, user.getEmail(), subject, body);
-            return "Email de recuperação enviado com sucesso!";
+            return "Email de estatistica enviado com sucesso!";
         } catch (Exception e) {
-            return "Erro ao enviar email de recuperação: " + e.getMessage();
+            return "Erro ao enviar email de estatistica: " + e.getMessage();
         }
     }
-    
-    public String sendWelcomeEmail(User user) {
-        String subject = "Bem-vindo ao Sistema!";
-        String body = createWelcomeTemplate(user.getName());
-        
-        try {
-            sendEmailWithRetry(user, user.getEmail(), subject, body);
-            return "Email de boas-vindas enviado com sucesso!";
-        } catch (Exception e) {
-            return "Erro ao enviar email de boas-vindas: " + e.getMessage();
-        }
-    }
-    
-    private String createForgotPasswordTemplate(String userName) {
-        return String.format("Olá %s,\n\n" +
-                "Você solicitou a recuperação de sua senha.\n\n" +
-                "Para redefinir sua senha, acesse o sistema e use a opção 'Redefinir Senha'.\n\n" +
-                "Se você não solicitou esta recuperação, ignore este email.\n\n" +
-                "Atenciosamente,\n" +
-                "Equipe do Sistema", userName);
-    }
-    
-    private String createWelcomeTemplate(String userName) {
-        return String.format("Olá %s,\n\n" +
-                "Seja bem-vindo ao nosso sistema!\n\n" +
-                "Sua conta foi criada com sucesso e você já pode fazer login.\n\n" +
-                "Em caso de dúvidas, entre em contato conosco.\n\n" +
-                "Atenciosamente,\n" +
-                "Equipe do Sistema", userName);
+
+    private String createStatsTemplate(String userName) {
+        long total = emailHistoryRepository.count();
+        long sent = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.SENT).size();
+        long failed = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.FAILED).size();
+        long pending = emailHistoryRepository.findByStatus(EmailHistory.EmailStatus.PENDING).size();
+
+        String stats = String.format(
+                "Olá %s,\n\n" +
+                "Aqui estão as estatísticas de Email:\n" +
+                "Total: %d\n" +
+                "Enviados: %d\n" +
+                "Falharam: %d\n" +
+                "Pendentes: %d", userName,total, sent, failed, pending);
+        return stats;
     }
     
     public String resendFailedEmail(Long emailHistoryId) {

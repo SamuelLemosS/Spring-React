@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.models.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -40,6 +41,6 @@ public class UserRegistrationDto {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getRole() { return role; }
+    public User.UserRole getRole() { return "USER".equals(role) ? User.UserRole.USER : User.UserRole.ADMIN; }
     public void setRole(String role) { this.role = role; }
 }
