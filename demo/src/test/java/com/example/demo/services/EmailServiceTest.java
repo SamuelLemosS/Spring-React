@@ -1,65 +1,73 @@
 package com.example.demo.services;
 
 import com.example.demo.models.User;
+import com.example.demo.models.EmailHistory;
 import com.example.demo.repositories.EmailHistoryRepository;
+import com.example.demo.repositories.UserRepository;
+import com.example.demo.services.EmailService;
+import jakarta.mail.internet.MimeMessage;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.ArgumentCaptor;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
 class EmailServiceTest {
-    
-    @Mock
+
     private JavaMailSender mailSender;
-    
-    @Mock
     private EmailHistoryRepository emailHistoryRepository;
-    
-    @InjectMocks
+    private UserRepository userRepository;
     private EmailService emailService;
-    
-    @Test
-    void testSendWelcomeEmail() {
-        // Arrange
-        User user = new User();
-        user.setName("João Silva");
-        user.setEmail("joao@exemplo.com");
-        
-        when(emailHistoryRepository.save(any(com.example.demo.models.EmailHistory.class)))
-                .thenReturn(new com.example.demo.models.EmailHistory());
-        
-        // Act
-        //String result = emailService.sendWelcomeEmail(user);
-        
-        // Assert
-        //assertNotNull(result);
-        //assertTrue(result.contains("sucesso"));
-        verify(emailHistoryRepository, times(2)).save(any(com.example.demo.models.EmailHistory.class));
+    private User mockUser;
+
+    @BeforeEach
+    void setup() {
+        mailSender = mock(JavaMailSender.class);
+        emailHistoryRepository = mock(EmailHistoryRepository.class);
+        userRepository = mock(UserRepository.class);
+        emailService = new EmailService(mailSender, emailHistoryRepository, userRepository);
+
+        mockUser = new User();
+        mockUser.setId(1L);
+        mockUser.setName("Samuel");
+        mockUser.setEmail("teste@teste.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(mockUser));
     }
-    
+
     @Test
-    void testSendForgotPasswordEmail() {
-        // Arrange
-        User user = new User();
-        user.setName("Maria Santos");
-        user.setEmail("maria@exemplo.com");
-        
-        when(emailHistoryRepository.save(any(com.example.demo.models.EmailHistory.class)))
-                .thenReturn(new com.example.demo.models.EmailHistory());
-        
-        // Act
-        //String result = emailService.sendForgotPasswordEmail(user);
-        
-        // Assert
-        //assertNotNull(result);
-        //assertTrue(result.contains("sucesso"));
-        verify(emailHistoryRepository, times(2)).save(any(com.example.demo.models.EmailHistory.class));
+    void deveEnviarEmailComSucesso() {
+        CompletableFuture<String> future = emailService.sendEmailWithRetry(
+                mockUser, "teste@teste.com", "Assunto", "Corpo"
+        );
+
+        String result = future.join(); // espera terminar async
+        assertEquals("Email enviado com sucesso!", result);
+
+        verify(mailSender, times(1)).send(any(SimpleMailMessage.class));
+        verify(emailHistoryRepository, atLeastOnce()).save(any(EmailHistory.class));
+    }
+
+    @Test
+    void deveFalharNoEnvioDeEmail() {
+        doThrow(new RuntimeException("SMTP indisponível"))
+                .when(mailSender).send(any(SimpleMailMessage.class));
+
+        CompletableFuture<String> future = emailService.sendEmailWithRetry(
+                mockUser, "teste@teste.com", "Assunto", "Corpo"
+        );
+
+        RuntimeException ex = assertThrows(RuntimeException.class, future::join);
+        assertTrue(ex.getMessage().contains("Falha no envio de email após retry"));
+
+        verify(mailSender, atLeast(2)).send(any(SimpleMailMessage.class)); // tentou no retry
+        verify(emailHistoryRepository, atLeastOnce()).save(any(EmailHistory.class));
     }
 }
