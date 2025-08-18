@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import { useSnackBar } from '../contexts/SnackBarContext';
+import { login as apiLogin } from '../services/api'; // import da API
+import store from '../services/store'; // Zustand store
 import './Login.css';
 
 const Login = () => {
@@ -10,16 +11,13 @@ const Login = () => {
     password: '',
   });
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
+
   const { showSuccess, showError } = useSnackBar();
+  const setAuth = store((state) => state.setAuth); // função para salvar token e userId
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -27,16 +25,20 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const result = await login(formData.email, formData.password);
-      
-      if (result.success) {
-        showSuccess('Login realizado com sucesso!');
-        navigate('/dashboard');
-      } else {
-        showError(result.message);
-      }
+      // Chamada da API de login
+      const data = await apiLogin(formData.email, formData.password);
+
+      // Salva token e userId no store e localStorage
+      setAuth(data.token, data.id);
+
+      // Mostra SnackBar de sucesso
+      showSuccess('Login realizado com sucesso!');
+
+      // Redireciona para dashboard
+      navigate('/dashboard');
     } catch (error) {
-      showError('Erro inesperado ao fazer login');
+      // Mostra erro no SnackBar
+      showError(typeof error === 'string' ? error : 'Erro inesperado ao fazer login');
     } finally {
       setLoading(false);
     }
@@ -45,10 +47,9 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-
         <form onSubmit={handleSubmit} className="login-form">
           <h2>Login</h2>
-          
+
           <div className="form-group">
             <label htmlFor="email">Email</label>
             <input
@@ -75,18 +76,11 @@ const Login = () => {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="btn-primary"
-            disabled={loading}
-          >
+          <button type="submit" className="btn-primary" disabled={loading}>
             {loading ? 'Entrando...' : 'Entrar'}
           </button>
 
           <div className="login-links">
-            <Link to="/forgot-password" className="link-forgot">
-              Esqueci minha senha
-            </Link>
             <div className="register-link">
               Não tem uma conta?{' '}
               <Link to="/register" className="link-register">

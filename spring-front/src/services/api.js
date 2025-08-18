@@ -1,64 +1,63 @@
-import axios from 'axios';
+import axios from "axios";
+
+import store from "./store";
+const baseUrl = "http://localhost:8080/";
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: baseUrl,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// Interceptor para adicionar token de autenticação
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+// ------------------ ROTAS ------------------ //
 
-// Interceptor para tratar erros de resposta
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+// Registrar -> /auth/register
+export const register = async (nome, email, senha) => {
+  try {
+    const response = await api.post("/auth/register", {
+      nome,
+      email,
+      senha,
+    });
+    return response.data; // string de confirmação
+  } catch (error) {
+    throw error.response?.data || "Erro no registro";
   }
-);
-
-export const authService = {
-  // Login
-  login: (email, password) => 
-    api.post('/auth/login', { email, password }),
-  
-  // Registro
-  register: (name, email, password) => 
-    api.post('/auth/register', { name, email, password }),
-  
-  // Esqueci senha
-  forgotPassword: (email) => 
-    api.post('/auth/forgot-password', { email }),
-  
-  // Verificar token
-  verifyToken: () => 
-    api.get('/auth/verify'),
-  
-  // Logout
-  logout: () => 
-    api.post('/auth/logout'),
 };
 
-export const userService = {
-  // Obter perfil do usuário
-  getProfile: () => 
-    api.get('/user/profile'),
-  
-  // Atualizar perfil
-  updateProfile: (data) => 
-    api.get('/user/profile', data),
+// Login -> /auth/login
+export const login = async (email, senha) => {
+  try {
+    const response = await api.post("/auth/login", {
+      email,
+      senha,
+    });
+
+    // resposta esperada: { id, token }
+    const { id, token } = response.data;
+
+    // salvar no localStorage
+    localStorage.setItem("token", token);
+    localStorage.setItem("userId", id);
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Erro no login";
+  }
+};
+
+// Email stats -> /email/stats/{userId}
+export const getEmailStats = async (userId) => {
+  try {
+    const { token, userId } = store.getState();
+    const response = await api.get(`/email/stats/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || "Erro ao buscar estatísticas de email";
+  }
 };
 
 export default api;
