@@ -53,15 +53,11 @@ public class EmailController {
     
     @PostMapping("/resend/{id}/{userId}")
     public ResponseEntity<String> resendFailedEmail(@PathVariable Long id,  @PathVariable Long userId) {
-        try {
             if (!isAdmin(userId)) {
                 return ResponseEntity.status(403).body("Acesso negado: apenas admin pode acessar.");
             }
             String result = emailService.resendFailedEmail(id);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro ao reenviar: " + e.getMessage());
-        }
     }
     
     @GetMapping("/stats/{userId}")

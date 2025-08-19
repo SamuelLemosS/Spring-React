@@ -23,22 +23,14 @@ public class AuthController {
     
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UserRegistrationDto registrationDto) {
-        try {
             String result = authService.registerUser(registrationDto);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro no registro: " + e.getMessage());
-        }
     }
     
     @PostMapping("/login")
     public ResponseEntity<? extends Object> login(@Valid @RequestBody LoginDto loginDto) {
-        try {
             LoginResponseDto result = authService.login(loginDto);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Erro no login: " + e.getMessage());
-        }
     }
 
 }
