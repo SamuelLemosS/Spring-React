@@ -129,6 +129,7 @@ Assim, o sistema não conseguirá se conectar ao servidor SMTP e lançará erro 
   Possibilidade de reenvio manual por rota prodegida por adiministrador  
   Teste básicos usando dados mokados  
   Idempotência, como enviar emails mostra dados referentes ao emails enviados, é importante que o reenvio não gere dados duplicados  
-  Front end com registro de usuários basicos, login, rota protegida e botão para solicitação de emails para usuários administradores 
+  Front end com registro de usuários basicos, login, rota protegida e botão para solicitação de emails para usuários administradores  
+  Front end com feedback para o usuário através de snake bar  
 
 ## Tempo gasto no projeto de aproximadamente 18h
