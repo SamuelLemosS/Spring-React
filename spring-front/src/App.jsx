@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import SnackBar from './components/SnackBar';
+import {PrivateRoutes} from './components/PrivateRoutes'
 import './App.css';
 
 function App() {
@@ -16,14 +17,14 @@ function App() {
             <Routes>
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route 
-                path="/dashboard" 
-                element={
-                  
-                    <Dashboard />
-                 
-                } 
-              />
+              <Route element={<PrivateRoutes/>}>
+                <Route 
+                  path="/dashboard" 
+                  element={    
+                      <Dashboard />
+                  } 
+                />
+              </Route>
               <Route path="/" element={<Navigate to="/login" replace />} />
             </Routes>
             <SnackBar />
