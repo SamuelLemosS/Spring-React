@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSnackBar } from '../contexts/SnackBarContext';
-import { login as apiLogin } from '../services/api'; // import da API
-import store from '../services/store'; // Zustand store
+import { login as apiLogin } from '../services/api'; 
+import store from '../services/store'; 
 import './Login.css';
 
 const Login = () => {
@@ -13,31 +13,27 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const { showSuccess, showError } = useSnackBar();
-  const setAuth = store((state) => state.setAuth); // função para salvar token e userId
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const {setId, setToken} = store();
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Chamada da API de login
       const data = await apiLogin(formData.email, formData.password);
 
-      // Salva token e userId no store e localStorage
-      setAuth(data.token, data.id);
-
-      // Mostra SnackBar de sucesso
+      setToken(data.token);
+      setId(data.userId);
+      
       showSuccess('Login realizado com sucesso!');
-
-      // Redireciona para dashboard
       navigate('/dashboard');
     } catch (error) {
-      // Mostra erro no SnackBar
+      console.log(error)
       showError(typeof error === 'string' ? error : 'Erro inesperado ao fazer login');
     } finally {
       setLoading(false);

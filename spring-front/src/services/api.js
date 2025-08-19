@@ -34,13 +34,6 @@ export const login = async (email, password) => {
       password,
     });
 
-    // resposta esperada: { id, token }
-    const { id, token } = response.data;
-
-    // salvar no localStorage
-    localStorage.setItem("token", token);
-    localStorage.setItem("userId", id);
-
     return response.data;
   } catch (error) {
     throw error.response?.data || "Erro no login";
@@ -48,9 +41,8 @@ export const login = async (email, password) => {
 };
 
 // Email stats -> /email/stats/{userId}
-export const getEmailStats = async (userId) => {
+export const getEmailStats = async (userId,token) => {
   try {
-    const { token, userId } = store.getState();
     const response = await api.get(`/email/stats/${userId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });

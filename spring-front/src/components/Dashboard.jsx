@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import store from '../services/store'; // Zustand store
+import store from '../services/store'; 
 import { getEmailStats } from '../services/api';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { userId, clearAuth } = store((state) => ({
-    userId: state.userId,
-    clearAuth: state.clearAuth,
-  }));
+  const {  clearAuth } = store();
+  const navigate = useNavigate();
 
   const [status, setStatus] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
 
   const handleLogout = () => {
     clearAuth();
+    navigate('/login');
   };
 
   const handleGetStatus = async () => {
@@ -20,7 +20,7 @@ const Dashboard = () => {
 
     setLoadingStatus(true);
     try {
-      const data = await getEmailStats(); // já pega token do store
+      const data = await getEmailStats(); 
       setStatus(data);
     } catch (error) {
       setStatus({ error: typeof error === 'string' ? error : 'Erro ao buscar status' });
