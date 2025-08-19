@@ -95,10 +95,9 @@ public class EmailService {
         String body = createStatsTemplate(user.getName());
 
         try {
-            sendEmailWithRetry(user, user.getEmail(), subject, body);
-            return "Email de estatistica enviado com sucesso!";
+            return sendEmailWithRetry(user, user.getEmail(), subject, body).get();
         } catch (Exception e) {
-            return "Erro ao enviar email de estatistica: " + e.getMessage();
+            return "Erro ao enviar email de estatistica, mas salvo";
         }
     }
 

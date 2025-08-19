@@ -25,7 +25,7 @@ const Dashboard = () => {
     try {
       const data = await getEmailStats(id,token); 
       setStatus(data);
-      showSuccess('Email enviado com sucesso!');
+      showSuccess(data);
     } catch (error) {
       showError(typeof error === 'string' ? error : 'Erro inesperado ao fazer login');
       setStatus({ error: typeof error === 'string' ? error : 'Erro ao buscar status' });
