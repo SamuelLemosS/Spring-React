@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import store from '../services/store'; 
 import { getEmailStats } from '../services/api';
+import { useSnackBar } from '../contexts/SnackBarContext';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css'
 
 const Dashboard = () => {
-  const {  clearAuth } = store();
+  const {  clearAuth,token,id } = store();
   const navigate = useNavigate();
+  const { showSuccess, showError } = useSnackBar();
 
   const [status, setStatus] = useState(null);
   const [loadingStatus, setLoadingStatus] = useState(false);
@@ -17,13 +19,15 @@ const Dashboard = () => {
   };
 
   const handleGetStatus = async () => {
-    if (!userId) return;
+    if (!id) return;
 
     setLoadingStatus(true);
     try {
-      const data = await getEmailStats(); 
+      const data = await getEmailStats(id,token); 
       setStatus(data);
+      showSuccess('Email enviado com sucesso!');
     } catch (error) {
+      showError(typeof error === 'string' ? error : 'Erro inesperado ao fazer login');
       setStatus({ error: typeof error === 'string' ? error : 'Erro ao buscar status' });
     } finally {
       setLoadingStatus(false);
