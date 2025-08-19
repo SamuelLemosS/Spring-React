@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import store from '../services/store'; 
 import { getEmailStats } from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
+import './Dashboard.css'
 
 const Dashboard = () => {
   const {  clearAuth } = store();
@@ -36,21 +37,13 @@ const Dashboard = () => {
           <h1>Obrigado por logar!</h1>
 
           <div className="dashboard-buttons">
+            <button onClick={handleGetStatus} className="btn-logout" disabled={loadingStatus}>
+              {loadingStatus ? 'Carregando...' : 'Enviar email de status resumido'}
+            </button>
             <button onClick={handleLogout} className="btn-logout">
               Sair
             </button>
-
-            <button onClick={handleGetStatus} className="btn-primary" disabled={loadingStatus}>
-              {loadingStatus ? 'Carregando...' : 'Ver Status'}
-            </button>
           </div>
-
-          {status && (
-            <div className="status-result">
-              <h3>Status do Email:</h3>
-              <pre>{JSON.stringify(status, null, 2)}</pre>
-            </div>
-          )}
         </div>
       </main>
     </div>
