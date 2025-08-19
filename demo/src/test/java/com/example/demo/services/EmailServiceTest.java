@@ -45,7 +45,7 @@ class EmailServiceTest {
     @Test
     void deveEnviarEmailComSucesso() {
         CompletableFuture<String> future = emailService.sendEmailWithRetry(
-                mockUser, "teste@teste.com", "Assunto", "Corpo"
+                mockUser, "teste@teste.com", "Assunto", "Corpo",true
         );
 
         String result = future.join(); // espera terminar async
@@ -61,7 +61,7 @@ class EmailServiceTest {
                 .when(mailSender).send(any(SimpleMailMessage.class));
 
         CompletableFuture<String> future = emailService.sendEmailWithRetry(
-                mockUser, "teste@teste.com", "Assunto", "Corpo"
+                mockUser, "teste@teste.com", "Assunto", "Corpo",true
         );
 
         RuntimeException ex = assertThrows(RuntimeException.class, future::join);

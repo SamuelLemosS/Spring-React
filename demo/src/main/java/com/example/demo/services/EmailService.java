@@ -28,9 +28,12 @@ public class EmailService {
     }
     
     @Async
-    public CompletableFuture<String> sendEmailWithRetry(User user, String toEmail, String subject, String body) {
+    public CompletableFuture<String> sendEmailWithRetry(User user, String toEmail, String subject, String body, Boolean retry) {
         EmailHistory emailHistory = new EmailHistory(user, toEmail, subject, body);
-        emailHistoryRepository.save(emailHistory);
+        if (retry) {
+            emailHistoryRepository.save(emailHistory);
+        }
+
         
         try {
             // Primeira tentativa
@@ -39,7 +42,9 @@ public class EmailService {
             // Sucesso na primeira tentativa
             emailHistory.setStatus(EmailHistory.EmailStatus.SENT);
             emailHistory.setSentAt(LocalDateTime.now());
-            emailHistoryRepository.save(emailHistory);
+            if (retry) {
+                emailHistoryRepository.save(emailHistory);
+            }
             
             return CompletableFuture.completedFuture("Email enviado com sucesso!");
             
@@ -47,7 +52,9 @@ public class EmailService {
             // Falha na primeira tentativa
             emailHistory.setStatus(EmailHistory.EmailStatus.FAILED);
             emailHistory.setErrorMessage(e.getMessage());
-            emailHistoryRepository.save(emailHistory);
+            if (retry) {
+                emailHistoryRepository.save(emailHistory);
+            }
             
             // Retry após 5 segundos
             return CompletableFuture.supplyAsync(() -> {
@@ -56,14 +63,18 @@ public class EmailService {
                     
                     emailHistory.setStatus(EmailHistory.EmailStatus.RETRY);
                     emailHistory.setRetryCount(1);
-                    emailHistoryRepository.save(emailHistory);
+                    if (retry) {
+                        emailHistoryRepository.save(emailHistory);
+                    }
                     
                     sendEmailInternal(toEmail, subject, body);
                     
                     // Sucesso no retry
                     emailHistory.setStatus(EmailHistory.EmailStatus.SENT);
                     emailHistory.setSentAt(LocalDateTime.now());
-                    emailHistoryRepository.save(emailHistory);
+                    if (retry) {
+                        emailHistoryRepository.save(emailHistory);
+                    }
                     
                     return "Email enviado com sucesso no retry!";
                     
@@ -71,7 +82,9 @@ public class EmailService {
                     // Falha no retry
                     emailHistory.setStatus(EmailHistory.EmailStatus.FAILED);
                     emailHistory.setErrorMessage("Retry falhou: " + retryException.getMessage());
-                    emailHistoryRepository.save(emailHistory);
+                    if (retry) {
+                        emailHistoryRepository.save(emailHistory);
+                    }
                     
                     throw new RuntimeException("Falha no envio de email após retry: " + retryException.getMessage());
                 }
@@ -95,7 +108,7 @@ public class EmailService {
         String body = createStatsTemplate(user.getName());
 
         try {
-            return sendEmailWithRetry(user, user.getEmail(), subject, body).get();
+            return sendEmailWithRetry(user, user.getEmail(), subject, body, true).get();
         } catch (Exception e) {
             return "Erro ao enviar email de estatistica, mas salvo";
         }
@@ -127,7 +140,7 @@ public class EmailService {
         
         try {
             sendEmailWithRetry(emailHistory.getUser(), emailHistory.getToEmail(), 
-                             emailHistory.getSubject(), emailHistory.getBody());
+                             emailHistory.getSubject(), emailHistory.getBody(),false);
             return "Email reenviado com sucesso!";
         } catch (Exception e) {
             return "Erro ao reenviar email: " + e.getMessage();
