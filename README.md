@@ -128,6 +128,7 @@ Assim, o sistema não conseguirá se conectar ao servidor SMTP e lançará erro 
   Persistência de histórico básico, que é mandado por email  
   Possibilidade de reenvio manual por rota prodegida por adiministrador  
   Teste básicos usando dados mokados  
-  Idempotência, como enviar emails mostra dados referentes ao emails enviados, é importante que o reenvio não gere dados duplicados
+  Idempotência, como enviar emails mostra dados referentes ao emails enviados, é importante que o reenvio não gere dados duplicados  
+  Front end com registro de usuários basicos, login, rota protegida e botão para solicitação de emails para usuários administradores 
 
 ## Tempo gasto no projeto de aproximadamente 18h
