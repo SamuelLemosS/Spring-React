@@ -1,7 +1,7 @@
 import axios from "axios";
 
 import store from "./store";
-const baseUrl = "http://localhost:8080/";
+const baseUrl = "http://localhost:8080/api";
 
 const api = axios.create({
   baseURL: baseUrl,
@@ -13,12 +13,12 @@ const api = axios.create({
 // ------------------ ROTAS ------------------ //
 
 // Registrar -> /auth/register
-export const register = async (nome, email, senha) => {
+export const register = async (name, email, password) => {
   try {
     const response = await api.post("/auth/register", {
-      nome,
+      name,
       email,
-      senha,
+      password,
     });
     return response.data; // string de confirmação
   } catch (error) {
@@ -27,11 +27,11 @@ export const register = async (nome, email, senha) => {
 };
 
 // Login -> /auth/login
-export const login = async (email, senha) => {
+export const login = async (email, password) => {
   try {
     const response = await api.post("/auth/login", {
       email,
-      senha,
+      password,
     });
 
     // resposta esperada: { id, token }
